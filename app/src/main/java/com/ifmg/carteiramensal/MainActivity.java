@@ -2,6 +2,7 @@ package com.ifmg.carteiramensal;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cadastroEvento(){
+
         anteriorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,12 +70,31 @@ public class MainActivity extends AppCompatActivity {
         novoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventosDB db = new EventosDB(MainActivity.this);
-                db.insereEvento();
+               // EventosDB db = new EventosDB(MainActivity.this);
+                //db.insereEvento();
 
 
                 //erro no método .show() - can not find
                 // Toast.makeText(MainActivity.this , db.getDatabaseName(), Toast.LENGTH_LONG.show());
+            }
+        });
+
+        entradaBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent trocaActv = new Intent(MainActivity.this, ViewEventos.class);
+                trocaActv.putExtra("acao", 0);
+                startActivity(trocaActv);
+            }
+        });
+
+        saidaBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent trocaActv = new Intent(MainActivity.this, ViewEventos.class);
+                trocaActv.putExtra("acao", 1);
+                startActivity(trocaActv);
+
             }
         });
     }
