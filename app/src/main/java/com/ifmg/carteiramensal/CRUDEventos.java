@@ -276,6 +276,7 @@ public class CRUDEventos extends AppCompatActivity {
             nomeFoto = eventoSelecionado.getCaminhoFoto();
             carregarImagem();
 
+            //criando variáveis para a diferença
             Calendar d1 = Calendar.getInstance();
             d1.setTime(eventoSelecionado.getValida());
 
