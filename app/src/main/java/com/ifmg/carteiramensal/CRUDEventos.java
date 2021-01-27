@@ -4,7 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,12 +22,16 @@ import android.widget.Toast;
 
 import com.ifmg.carteiramensal.modelo.Evento;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import Ferramentas.EventosDB;
 
@@ -45,6 +53,7 @@ public class CRUDEventos extends AppCompatActivity {
     //3 edicao saida
     private int acao = -1;
     private Evento eventoSelecionado;
+    private String nomeFoto;
 
 
     @Override
@@ -143,7 +152,74 @@ public class CRUDEventos extends AppCompatActivity {
             }
         });
 
+        fotoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cameraActivity = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraActivity, 100);
+            }
+        });
 
+
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode==RESULT_OK){
+            Bitmap imagemUser = (Bitmap) data.getExtras().get("data");
+            foto.setImageBitmap(imagemUser);
+            foto.setBackground(null);
+
+            salvarImagem(imagemUser);
+        }
+    }
+
+    private void salvarImagem(Bitmap imagem){
+        Random gerador = new Random();
+        Date instante = new Date();
+
+        //define nome da imagem
+        String nome = gerador.nextInt() +""+ instante.getTime()+ ".png";
+
+        nomeFoto = nome;
+        File sd = Environment.getExternalStorageDirectory();
+        File fotoArquivo =new File(sd, nome);
+
+        //gravando imagem no dispositivo
+        try{
+            FileOutputStream gravador = new FileOutputStream(fotoArquivo);
+            //comprimindo imagem
+            imagem.compress(Bitmap.CompressFormat.PNG, 100, gravador);
+            gravador.flush();
+            gravador.close();
+
+        }catch (Exception ex){
+            System.out.print("erro ao armazenar a foto no dispositivo");
+        }
+
+    }
+
+    private void carregarImagem(){
+        if(nomeFoto!= null){
+            //encontrar a pasta
+            File sd = Environment.getExternalStorageDirectory();
+            File arquivoLeitura = new File(sd, nomeFoto);
+
+
+            try{
+                //leitura
+                FileInputStream leitor = new FileInputStream(arquivoLeitura);
+                Bitmap imagem = BitmapFactory.decodeStream(leitor);
+
+                foto.setImageBitmap(imagem);
+                foto.setBackground(null);
+
+
+            }catch (Exception e){
+                System.out.print("erro na leitura do arquivo");
+            }
+        }
     }
 
     private void ajustaPorAcao() {
@@ -197,6 +273,9 @@ public class CRUDEventos extends AppCompatActivity {
             valorTxt.setText(eventoSelecionado.getValor()+"");
             dataTxt.setText(formatador.format(eventoSelecionado.getOcorreu()));
 
+            nomeFoto = eventoSelecionado.getCaminhoFoto();
+            carregarImagem();
+
             Calendar d1 = Calendar.getInstance();
             d1.setTime(eventoSelecionado.getValida());
 
@@ -236,6 +315,7 @@ public class CRUDEventos extends AppCompatActivity {
 
         dataLimite.set(Calendar.DAY_OF_MONTH, dataLimite.getActualMaximum(Calendar.DAY_OF_MONTH));
         eventoSelecionado.setValida(dataLimite.getTime());
+        eventoSelecionado.setCaminhoFoto(nomeFoto);
 
         EventosDB db = new EventosDB(CRUDEventos.this);
         db.updateEvento(eventoSelecionado);
@@ -270,7 +350,7 @@ public class CRUDEventos extends AppCompatActivity {
 
         dataLimite.set(Calendar.DAY_OF_MONTH, dataLimite.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-        Evento novoEvento = new Evento(nome, null, valor, new Date(), dataLimite.getTime(), diaEvento);
+        Evento novoEvento = new Evento(nome, nomeFoto, valor, new Date(), dataLimite.getTime(), diaEvento);
         EventosDB bd = new EventosDB(CRUDEventos.this);
         bd.insereEvento(novoEvento);
 
