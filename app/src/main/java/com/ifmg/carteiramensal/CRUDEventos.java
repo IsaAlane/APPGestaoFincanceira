@@ -149,10 +149,12 @@ public class CRUDEventos extends AppCompatActivity {
             }
             case 2: {
                 tituloTxt.setText("Edição de Entrada");
+                ajusteEdicao();
                 break;
             }
             case 3: {
                 tituloTxt.setText("Edição de saída");
+                ajusteEdicao();
                 break;
             }
             default: {
@@ -161,6 +163,39 @@ public class CRUDEventos extends AppCompatActivity {
         }
 
     }
+
+    private void ajusteEdicao(){
+        cancelarBtn.setText("excluir");
+        salvarBtn.setText("atualizar");
+
+
+        //carregar informação do evento do bd
+        int id = Integer.parseInt(getIntent().getStringExtra("id"));
+
+        if(id!=0){
+            EventosDB db = new EventosDB(CRUDEventos.this);
+            Evento eventoSelecionado = db.buscaEventoId(id);
+
+            //carregar informações nos campos
+            SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");
+
+
+            nomeTxt.setText(eventoSelecionado.getNome());
+            valorTxt.setText(eventoSelecionado.getValor()+"");
+            dataTxt.setText(formatador.format(eventoSelecionado.getOcorreu()));
+
+            Calendar d1 = Calendar.getInstance();
+            d1.setTime(eventoSelecionado.getValida());
+
+            Calendar d2 = Calendar.getInstance();
+            d2.setTime(eventoSelecionado.getOcorreu());
+
+            repeteBtn.setChecked(d1.get(Calendar.MONTH) != d2.get(Calendar.MONTH)? true : false);
+
+
+        }
+    }
+
 
     private void cadastraNovoEvento() {
         String nome = nomeTxt.getText().toString();

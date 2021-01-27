@@ -59,6 +59,40 @@ public class EventosDB extends SQLiteOpenHelper {
     public void atualizaEvento(){
 
     }
+
+    public Evento buscaEventoId(int idEvento) {
+        String sql = "SELECT * evento WHERE id =" + idEvento;
+        Evento resultado = null;
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+
+            //extraindo informações e criando o objeto
+            Cursor tupla = db.rawQuery(sql, null);
+            if(tupla.moveToFirst()){
+                String nome = tupla.getString(1);
+                double valor = tupla.getDouble(2);
+                if(valor <0){
+                    valor *= -1;
+                }
+                String urlFoto = tupla.getString(3);
+                Date dataocorreu = new Date(tupla.getLong(4));
+                Date datacadastro = new Date(tupla.getLong(5));
+                Date datavalida = new Date(tupla.getLong(6));
+
+                resultado = new Evento(idEvento, nome,urlFoto, valor, datacadastro,datavalida, dataocorreu );
+            }
+
+
+
+        }catch (SQLiteException ex){
+            //mensagem de bug
+            System.out.print("ocorreu erro na consulta ao banco por id!");
+            ex.printStackTrace();
+
+        }
+        return resultado;
+
+    }
+
     public ArrayList<Evento> buscaEventos(int op, Calendar data){
 
         ArrayList <Evento> resultado = new ArrayList<>();

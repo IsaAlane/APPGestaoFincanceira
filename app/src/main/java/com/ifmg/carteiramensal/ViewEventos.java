@@ -7,6 +7,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ListView;
@@ -51,7 +52,6 @@ public class ViewEventos extends AppCompatActivity {
 
         ajusteOp();
         cadastrarEventos();
-
         carregaEventosLista();
 
     }
@@ -68,6 +68,25 @@ public class ViewEventos extends AppCompatActivity {
 
         adapter = new ItemListaEventos(getApplicationContext(), eventos);
         listaEventos.setAdapter(adapter);
+        listaEventos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int indice, long id) {
+
+                Evento eventoSelecionado = eventos.get(indice);
+                Intent novoFluxo = new Intent(ViewEventos.this, CRUDEventos.class);
+
+                if(operacao==0){
+                    //edição entrada
+                    novoFluxo.putExtra("acao", 2);
+                }else{
+                    //edição saída
+                    novoFluxo.putExtra("acao", 3);
+                }
+                novoFluxo.putExtra("id", eventoSelecionado.getId()+" ");
+                startActivityForResult(novoFluxo, operacao);
+            }
+        });
+
 
         double total = 0.0;
         for(int i=0; i< eventos.size(); i++){
