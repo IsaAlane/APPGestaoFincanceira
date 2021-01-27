@@ -44,6 +44,8 @@ public class CRUDEventos extends AppCompatActivity {
     //2 = edicao entrada
     //3 edicao saida
     private int acao = -1;
+    private Evento eventoSelecionado;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +106,12 @@ public class CRUDEventos extends AppCompatActivity {
         salvarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cadastraNovoEvento();
+                if(acao<2){
+                    cadastraNovoEvento();
+                }else{
+                    //update no banco de dados pelo método
+                    updateEvento();
+                }
             }
         });
 
@@ -126,7 +133,13 @@ public class CRUDEventos extends AppCompatActivity {
         cancelarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                //conferindo acao para ativar o botao
+                if(acao<2){
+                    finish();
+                }else{
+                    //deletar dados pelo método
+                }
+
             }
         });
 
@@ -174,7 +187,7 @@ public class CRUDEventos extends AppCompatActivity {
 
         if(id!=0){
             EventosDB db = new EventosDB(CRUDEventos.this);
-            Evento eventoSelecionado = db.buscaEventoId(id);
+            eventoSelecionado = db.buscaEventoId(id);
 
             //carregar informações nos campos
             SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");
@@ -191,10 +204,44 @@ public class CRUDEventos extends AppCompatActivity {
             d2.setTime(eventoSelecionado.getOcorreu());
 
             repeteBtn.setChecked(d1.get(Calendar.MONTH) != d2.get(Calendar.MONTH)? true : false);
+            if(repeteBtn.isChecked()){
+                mesesRepeteSpi.setEnabled(true);
+
+                //calculo diferenca mes cadastro e mes valido
+                mesesRepeteSpi.setSelection(d1.get(Calendar.MONTH) - d2.get(Calendar.MONTH) -1);
+
+            }
 
 
         }
     }
+
+    private void updateEvento(){
+        eventoSelecionado.setNome(nomeTxt.getText().toString());
+        eventoSelecionado.setValor(Double.parseDouble(valorTxt.getText().toString()));
+
+        if(acao==3){
+            eventoSelecionado.setValor(eventoSelecionado.getValor()*-1);
+        }
+        eventoSelecionado.setOcorreu(calendarioTemp.getTime());
+        Calendar dataLimite = Calendar.getInstance();
+        dataLimite.setTime(calendarioTemp.getTime());
+
+
+        if (repeteBtn.isChecked()) {
+            String mesStr = (String) mesesRepeteSpi.getSelectedItem();
+
+            dataLimite.add(Calendar.MONTH, Integer.parseInt(mesStr));
+        }
+
+        dataLimite.set(Calendar.DAY_OF_MONTH, dataLimite.getActualMaximum(Calendar.DAY_OF_MONTH));
+        eventoSelecionado.setValida(dataLimite.getTime());
+
+        EventosDB db = new EventosDB(CRUDEventos.this);
+        db.updateEvento(eventoSelecionado);
+        finish();
+    }
+
 
 
     private void cadastraNovoEvento() {

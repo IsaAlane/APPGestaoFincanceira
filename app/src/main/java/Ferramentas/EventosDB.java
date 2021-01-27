@@ -56,7 +56,24 @@ public class EventosDB extends SQLiteOpenHelper {
 
     }
 
-    public void atualizaEvento(){
+    public void updateEvento(Evento eventoAtualizado){
+        try(SQLiteDatabase db = this.getWritableDatabase()){
+
+                ContentValues valores = new ContentValues();
+                valores.put("nome", eventoAtualizado.getNome());
+                valores.put("valor", eventoAtualizado.getValor());
+                valores.put("imagem", eventoAtualizado.getCaminhoFoto());
+                valores.put("dataocorreu", eventoAtualizado.getOcorreu().getTime());
+                valores.put("datavalida", eventoAtualizado.getValida().getTime());
+
+                db.update("evento", valores, "id=?", new String[]{eventoAtualizado.getId()+""});
+
+
+
+        }catch (SQLiteException ex){
+            System.out.print("erro na atualização do evento");
+            ex.printStackTrace();
+        }
 
     }
 
