@@ -1,5 +1,6 @@
 package com.ifmg.carteiramensal;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
@@ -18,6 +19,8 @@ import com.ifmg.carteiramensal.modelo.ItemListaEventos;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import Ferramentas.EventosDB;
 
 public class ViewEventos extends AppCompatActivity {
 
@@ -57,12 +60,22 @@ public class ViewEventos extends AppCompatActivity {
         eventos = new ArrayList<>();
 
         //procura eventos no BD
-        eventos.add(new Evento("Padaria", null, 10.60, new Date(), new Date(), new Date()));
-        eventos.add(new Evento("Spermercado", null, 500.00, new Date(), new Date(), new Date()));
+        //eventos.add(new Evento("Padaria", null, 10.60, new Date(), new Date(), new Date()));
+       // eventos.add(new Evento("Spermercado", null, 500.00, new Date(), new Date(), new Date()));
+
+        EventosDB db = new EventosDB(ViewEventos.this);
+        eventos = db.buscaEventos(operacao, MainActivity.dataApp);
 
         adapter = new ItemListaEventos(getApplicationContext(), eventos);
         listaEventos.setAdapter(adapter);
 
+        double total = 0.0;
+        for(int i=0; i< eventos.size(); i++){
+             total+= eventos.get(i).getValor();
+
+        }
+
+        totalTxt.setText(String.format("%.2f"+total));
     }
 
     private void cadastrarEventos(){
@@ -75,13 +88,24 @@ public class ViewEventos extends AppCompatActivity {
 
                     if(operacao==0){
                         trocaActv.putExtra("acao", 0);
+                        startActivityForResult(trocaActv, 0);
+
                     }else{
-                        trocaActv.putExtra("acao", 0);
+                        trocaActv.putExtra("acao", 1);
+                        startActivityForResult(trocaActv, 1);
+
                     }
-                    startActivity(trocaActv);
+
                 }
 
 
+            }
+        });
+
+        cancelarBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }
@@ -96,6 +120,13 @@ public class ViewEventos extends AppCompatActivity {
                 Toast.makeText(ViewEventos.this, "Erro no parametro acao", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+
+    protected void onActivityResult(int codigoRequest, int codigoResultado, Intent data) {
+        super.onActivityResult(codigoRequest, codigoResultado, data);
+
+        carregaEventosLista();
     }
 
 }

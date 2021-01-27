@@ -10,6 +10,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ifmg.carteiramensal.modelo.Evento;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import Ferramentas.EventosDB;
@@ -21,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton entradaBtn, saidaBtn;
     private Button anteriorBtn, proximoBtn, novoBtn;
     private Calendar hoje;
-    private Calendar dataApp;
+    static Calendar dataApp;
 
 
     @Override
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         mostraDataApp();
-
+        atualizaValores();
     }
 
     private void cadastroEvento(){
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent trocaActv = new Intent(MainActivity.this, ViewEventos.class);
                 trocaActv.putExtra("acao", 0);
-                startActivity(trocaActv);
+                startActivityForResult(trocaActv, 0);
             }
         });
 
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent trocaActv = new Intent(MainActivity.this, ViewEventos.class);
                 trocaActv.putExtra("acao", 1);
-                startActivity(trocaActv);
+                startActivityForResult(trocaActv,1);
 
             }
         });
@@ -123,7 +126,38 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mostraDataApp();
+        atualizaValores();
     }
 
+    private void atualizaValores(){
+        EventosDB db = new EventosDB(MainActivity.this);
 
+
+        ArrayList<Evento> saidasLista = db.buscaEventos(1, dataApp);
+        ArrayList<Evento> entradasLista = db.buscaEventos(0, dataApp);
+
+        double entradaTotal = 0.0;
+        double saidaTotal = 0.0;
+
+        for(int i=0; i< entradasLista.size(); i++){
+            entradaTotal += entradasLista.get(i).getValor();
+        }
+
+        for(int i=0; i< saidasLista.size(); i++){
+            saidaTotal += saidasLista.get(i).getValor();
+        }
+
+        double saldoTotal = entradaTotal - saidaTotal;
+
+        entrada.setText(String.format("%.2f"+entradaTotal));
+        saida.setText(String.format("%.2f"+saidaTotal));
+        saldo.setText(String.format("%.2f"+saldoTotal));
+
+    }
+
+    protected void onActivityResult(int codigoRequest, int codigoResultado, Intent data) {
+        super.onActivityResult(codigoRequest, codigoResultado, data);
+
+        atualizaValores();
+    }
 }

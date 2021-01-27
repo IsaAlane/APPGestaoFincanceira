@@ -53,7 +53,7 @@ public class CRUDEventos extends AppCompatActivity {
         tituloTxt = (TextView) findViewById(R.id.tituloCadastroTxt);
         nomeTxt = (EditText) findViewById(R.id.nomeCadastroTxt);
         valorTxt = (EditText) findViewById(R.id.valorCadastroTxt);
-        dataTxt =  (TextView) findViewById(R.id.dataCadastroTxt);
+        dataTxt = (TextView) findViewById(R.id.dataCadastroTxt);
         repeteBtn = (CheckBox) findViewById(R.id.repeteBtn);
         salvarBtn = (Button) findViewById(R.id.salvarCadastroBtn);
         cancelarBtn = (Button) findViewById(R.id.cancelarCadastroBtn);
@@ -70,26 +70,27 @@ public class CRUDEventos extends AppCompatActivity {
 
     }
 
-    private void configuraSpinner(){
+    private void configuraSpinner() {
         List<String> mes = new ArrayList<>();
 
-        for(int i=0; i <=24; i++){
-            mes.add(i+"");
+        for (int i = 0; i <= 24; i++) {
+            mes.add(i + "");
         }
 
-        ArrayAdapter<String> listaAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, mes );
+        ArrayAdapter<String> listaAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, mes);
         mesesRepeteSpi.setAdapter(listaAdapter);
+        mesesRepeteSpi.setEnabled(false);
     }
 
 
-    private void cadastraEventos(){
+    private void cadastraEventos() {
 
         calendarioTemp = Calendar.getInstance();
         calendarioUser = new DatePickerDialog(CRUDEventos.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int ano, int mes, int dia) {
                 calendarioTemp.set(ano, mes, dia);
-                dataTxt.setText(dia+"/"+(mes+1)+"/"+ano);
+                dataTxt.setText(dia + "/" + (mes + 1) + "/" + ano);
             }
         }, calendarioTemp.get(Calendar.YEAR), calendarioTemp.get(Calendar.MONTH), calendarioTemp.get(Calendar.DAY_OF_MONTH));
 
@@ -108,14 +109,36 @@ public class CRUDEventos extends AppCompatActivity {
         });
 
 
+        //desativar e ativar spinner
+        repeteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (repeteBtn.isChecked()) {
+                    mesesRepeteSpi.setEnabled(true);
+                } else {
+                    mesesRepeteSpi.setEnabled(false);
+                }
+            }
+        });
+
+
+        //finalizando execução da activity
+        cancelarBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
     }
 
-    private void ajustaPorAcao(){
+    private void ajustaPorAcao() {
 
         Calendar hoje = Calendar.getInstance();
         SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");
         dataTxt.setText(formatador.format(hoje.getTime()));
-        switch (acao){
+        switch (acao) {
             case 0: {
                 tituloTxt.setText("Cadastro de Entrada");
                 break;
@@ -131,49 +154,49 @@ public class CRUDEventos extends AppCompatActivity {
             case 3: {
                 tituloTxt.setText("Edição de saída");
                 break;
-            } default:{
+            }
+            default: {
 
             }
         }
 
     }
 
-    private void cadastraNovoEvento(){
+    private void cadastraNovoEvento() {
         String nome = nomeTxt.getText().toString();
         double valor = Double.parseDouble(valorTxt.getText().toString());
 
-        if(acao==1 || acao==3){
+        if (acao == 1 || acao == 3) {
             valor *= -1;
         }
 
 
-        SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");
-        String dataStrg = dataTxt.getText().toString();
+        //SimpleDateFormat formatador = new SimpleDateFormat("dd/MM/yyyy");
+        //String dataStrg = dataTxt.getText().toString();
 
-        try {
-            Date diaEvento = formatador.parse(dataStrg);
-            Calendar dataLimite = Calendar.getInstance();
-            dataLimite.setTime(calendarioTemp.getTime());
+        //try {
+        Date diaEvento = calendarioTemp.getTime();
+        Calendar dataLimite = Calendar.getInstance();
+        dataLimite.setTime(calendarioTemp.getTime());
 
 
-            if(repeteBtn.isChecked()){
+        if (repeteBtn.isChecked()) {
+            String mesStr = (String) mesesRepeteSpi.getSelectedItem();
 
-            }
-
-            dataLimite.set(Calendar.DAY_OF_MONTH, dataLimite.getActualMaximum(Calendar.DAY_OF_MONTH));
-
-            Evento novoEvento = new Evento(nome,null, valor, new Date(), dataLimite.getTime(), diaEvento);
-            EventosDB bd = new EventosDB(CRUDEventos.this);
-            bd.insereEvento(novoEvento);
-
-            Toast.makeText(CRUDEventos.this,"Cadastro efetuado com sucesso", Toast.LENGTH_LONG).show();
-            finish();
-
-        }catch(ParseException ex){
-            System.err.print("erro no formato da data");
+            dataLimite.add(Calendar.MONTH, Integer.parseInt(mesStr));
         }
 
+        dataLimite.set(Calendar.DAY_OF_MONTH, dataLimite.getActualMaximum(Calendar.DAY_OF_MONTH));
 
+        Evento novoEvento = new Evento(nome, null, valor, new Date(), dataLimite.getTime(), diaEvento);
+        EventosDB bd = new EventosDB(CRUDEventos.this);
+        bd.insereEvento(novoEvento);
 
+        Toast.makeText(CRUDEventos.this, "Cadastro efetuado com sucesso", Toast.LENGTH_LONG).show();
+        finish();
+
+        /*}catch(ParseException ex){
+        System.err.print("erro no formato da data");
+        }*/
     }
 }
