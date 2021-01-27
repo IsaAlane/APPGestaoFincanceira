@@ -6,11 +6,13 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,8 +20,10 @@ import com.ifmg.carteiramensal.modelo.Evento;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import Ferramentas.EventosDB;
 
@@ -32,6 +36,7 @@ public class CRUDEventos extends AppCompatActivity {
     private Button salvarBtn, cancelarBtn, fotoBtn;
     private ImageView foto;
     private Calendar calendarioTemp;
+    private Spinner mesesRepeteSpi;
 
 
     //0 = cadastro entrada
@@ -54,14 +59,28 @@ public class CRUDEventos extends AppCompatActivity {
         cancelarBtn = (Button) findViewById(R.id.cancelarCadastroBtn);
         fotoBtn = (Button) findViewById(R.id.fotoBtn);
         foto = (ImageView) findViewById(R.id.fotoTxt);
+        mesesRepeteSpi = (Spinner) findViewById(R.id.mesesSpinner);
 
         Intent intencao = getIntent();
         acao = intencao.getIntExtra("acao", -1);
 
         ajustaPorAcao();
         cadastraEventos();
+        configuraSpinner();
 
     }
+
+    private void configuraSpinner(){
+        List<String> mes = new ArrayList<>();
+
+        for(int i=0; i <=24; i++){
+            mes.add(i+"");
+        }
+
+        ArrayAdapter<String> listaAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, mes );
+        mesesRepeteSpi.setAdapter(listaAdapter);
+    }
+
 
     private void cadastraEventos(){
 

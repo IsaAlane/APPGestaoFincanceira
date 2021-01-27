@@ -13,12 +13,21 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ifmg.carteiramensal.modelo.Evento;
+import com.ifmg.carteiramensal.modelo.ItemListaEventos;
+
+import java.util.ArrayList;
+import java.util.Date;
+
 public class ViewEventos extends AppCompatActivity {
 
 
     private TextView tituloTxt, totalTxt;
     private ListView listaEventos;
     private Button novoBtn, cancelarBtn;
+
+    private ArrayList<Evento> eventos;
+    private ItemListaEventos adapter;
 
     //0 = entrada 1 = saída
     private int operacao = -1;
@@ -40,8 +49,21 @@ public class ViewEventos extends AppCompatActivity {
         ajusteOp();
         cadastrarEventos();
 
+        carregaEventosLista();
+
     }
 
+    private void carregaEventosLista(){
+        eventos = new ArrayList<>();
+
+        //procura eventos no BD
+        eventos.add(new Evento("Padaria", null, 10.60, new Date(), new Date(), new Date()));
+        eventos.add(new Evento("Spermercado", null, 500.00, new Date(), new Date(), new Date()));
+
+        adapter = new ItemListaEventos(getApplicationContext(), eventos);
+        listaEventos.setAdapter(adapter);
+
+    }
 
     private void cadastrarEventos(){
         novoBtn.setOnClickListener(new View.OnClickListener() {
