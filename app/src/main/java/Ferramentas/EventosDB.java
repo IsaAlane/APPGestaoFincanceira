@@ -56,6 +56,7 @@ public class EventosDB extends SQLiteOpenHelper {
 
     }
 
+    //ATUlizar evento
     public void updateEvento(Evento eventoAtualizado){
         try(SQLiteDatabase db = this.getWritableDatabase()){
 
